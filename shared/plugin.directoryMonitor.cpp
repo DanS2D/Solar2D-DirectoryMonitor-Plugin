@@ -34,9 +34,8 @@ namespace Corona
 	public:
 		static const char kName[];
 		static const char kEventName[];
-		static CoronaLuaRef listener;
 		static EventData eventData;
-		static moodycamel::BlockingReaderWriterQueue<EventData> data;
+		static moodycamel::ReaderWriterQueue<EventData> data;
 
 	public:
 		static int Open(lua_State* L);
@@ -58,9 +57,8 @@ namespace Corona
 	// This corresponds to the name of the library, e.g. [Lua] require "plugin.library"
 	const char DirectoryMonitorLibrary::kName[] = "plugin.directoryMonitor";
 	const char DirectoryMonitorLibrary::kEventName[] = "directoryMonitor";
-	CoronaLuaRef DirectoryMonitorLibrary::listener = NULL;
 	EventData DirectoryMonitorLibrary::eventData = {};
-	moodycamel::BlockingReaderWriterQueue <EventData> DirectoryMonitorLibrary::data(1);
+	moodycamel::ReaderWriterQueue<EventData> DirectoryMonitorLibrary::data(1);
 	static int callbackRef = 0;
 
 	int DirectoryMonitorLibrary::Open(lua_State* L)
@@ -99,9 +97,9 @@ namespace Corona
 			//   "enterFrame"
 			//   ProcessFrame (closure)
 			{
-				CoronaLuaPushRuntime(L); // push 'Runtime'
+				CoronaLuaPushRuntime(L);				 // push 'Runtime'
 				lua_getfield(L, -1, "addEventListener"); // push 'f', i.e. Runtime.addEventListener
-				lua_insert(L, -2); // swap so 'f' is below 'Runtime'
+				lua_insert(L, -2);						 // swap so 'f' is below 'Runtime'
 				lua_pushstring(L, "enterFrame");
 
 				// Push ProcessFrame as closure so it has access
@@ -127,9 +125,9 @@ namespace Corona
 		if (lua_type(L, -1) == LUA_TTABLE)
 		{
 			lua_getfield(L, -1, "removeEventListener"); // push 'f', i.e. Runtime.addEventListener
-			lua_insert(L, -2); // swap so 'f' is below 'Runtime'
+			lua_insert(L, -2);							// swap so 'f' is below 'Runtime'
 			lua_pushstring(L, "enterFrame");
-			lua_rawgeti(L, LUA_REGISTRYINDEX, callbackRef);// pushes closure
+			lua_rawgeti(L, LUA_REGISTRYINDEX, callbackRef); // pushes closure
 			CoronaLuaDoCall(L, 3, 0);
 			luaL_unref(L, LUA_REGISTRYINDEX, callbackRef);
 		}
@@ -214,9 +212,9 @@ namespace Corona
 
 				if (canDequeue)
 				{
-					CoronaLuaPushRuntime(L); // push 'Runtime'
+					CoronaLuaPushRuntime(L);			  // push 'Runtime'
 					lua_getfield(L, -1, "dispatchEvent"); // push 'f', i.e. Runtime.dispatchEvent
-					lua_insert(L, -2); // swap so 'f' is below 'Runtime'
+					lua_insert(L, -2);					  // swap so 'f' is below 'Runtime'
 
 					CoronaLuaNewEvent(L, DirectoryMonitorLibrary::kEventName);
 
@@ -236,7 +234,7 @@ namespace Corona
 					lua_setfield(L, -2, "previousFilePath");
 
 					lua_pushvalue(L, -3);
-					lua_call(L, 3, 0);  // Call Runtime.dispatchEvent() with 3 arguments (runtime, eventName, event table)
+					lua_call(L, 3, 0); // Call Runtime.dispatchEvent() with 3 arguments (runtime, eventName, event table)
 				}
 			});
 
@@ -245,7 +243,7 @@ namespace Corona
 		return 0;
 	}
 
-	// 
+	//
 	int DirectoryMonitorLibrary::watch(lua_State* L)
 	{
 		const char* filePath;
