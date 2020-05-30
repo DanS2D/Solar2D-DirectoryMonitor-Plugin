@@ -35,7 +35,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -87,7 +87,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(Configuration)\</OutDir>
     <TargetName>plugin_directoryMonitor</TargetName>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\shared\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>plugin_taglib</TargetName>
@@ -158,8 +158,8 @@
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>copy "$(OutDir)$(TargetName).dll" "C:\Users\Danny\Programming\Projects\CoronaSDK\Plugins\distribution\directoryMonitor\$(TargetName).dll"
-cd "C:\Users\Danny\Programming\Projects\CoronaSDK\Plugins\distribution\directoryMonitor\"
+      <Command>copy "$(OutDir)$(TargetName).dll" "C:\Users\Danny\Programming\Projects\Solar2D\Plugins\distribution\directoryMonitor\$(TargetName).dll"
+cd "C:\Users\Danny\Programming\Projects\Solar2D\Plugins\distribution\directoryMonitor\"
 call make_plugin.bat
 rmdir /S /Q "C:\Users\Danny\AppData\Roaming\Corona Labs\Corona Simulator\Plugins"</Command>
     </PostBuildEvent>

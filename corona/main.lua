@@ -9,14 +9,13 @@ local docsPath = system.pathForFile("", system.DocumentsDirectory)
 local count = 0
 
 local function directoryListener(event)
-    count = count + 1
+	count = count + 1
 
-    for k, v in pairs(event) do
-        print(k, v)
-    end
+	for k, v in pairs(event) do
+		print(k, v)
+	end
 
-    print(string.format("-------COUNT = %s---------", count))
-
+	print(string.format("-------COUNT = %s---------", count))
 end
 
 Runtime:addEventListener("directoryMonitor", directoryListener)

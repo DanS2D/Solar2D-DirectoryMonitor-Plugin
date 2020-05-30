@@ -8,7 +8,6 @@
 #define _DMON_LOG_ERRORF
 #include "dmon.h"
 #include "readerwriterqueue.h"
-#include <thread>
 
 // ----------------------------------------------------------------------------
 using namespace std;
@@ -166,81 +165,35 @@ namespace Corona
 	static void watchCallback(dmon_watch_id watchID, dmon_action action, const char* rootDir,
 		const char* filePath, const char* previousFilePath, void* user)
 	{
-		thread writer([&]()
-			{
-				DirectoryMonitorLibrary::eventData.watchID = watchID.id;
-				DirectoryMonitorLibrary::eventData.filePath = filePath;
-				DirectoryMonitorLibrary::eventData.rootDirectory = rootDir;
-				DirectoryMonitorLibrary::eventData.previousFilePath = previousFilePath;
+		DirectoryMonitorLibrary::eventData.watchID = watchID.id;
+		DirectoryMonitorLibrary::eventData.filePath = filePath;
+		DirectoryMonitorLibrary::eventData.rootDirectory = rootDir;
+		DirectoryMonitorLibrary::eventData.previousFilePath = previousFilePath;
 
-				switch (action)
-				{
-				case DMON_ACTION_CREATE:
-					DirectoryMonitorLibrary::eventData.action = "create";
-					break;
+		switch (action)
+		{
+		case DMON_ACTION_CREATE:
+			DirectoryMonitorLibrary::eventData.action = "create";
+			break;
 
-				case DMON_ACTION_DELETE:
-					DirectoryMonitorLibrary::eventData.action = "delete";
-					break;
+		case DMON_ACTION_DELETE:
+			DirectoryMonitorLibrary::eventData.action = "delete";
+			break;
 
-				case DMON_ACTION_MODIFY:
-					DirectoryMonitorLibrary::eventData.action = "modify";
-					break;
+		case DMON_ACTION_MODIFY:
+			DirectoryMonitorLibrary::eventData.action = "modify";
+			break;
 
-				case DMON_ACTION_MOVE:
-					DirectoryMonitorLibrary::eventData.action = "move";
-					break;
+		case DMON_ACTION_MOVE:
+			DirectoryMonitorLibrary::eventData.action = "move";
+			break;
 
-				default:
-					DirectoryMonitorLibrary::eventData.action = "unknown";
-					break;
-				}
+		default:
+			DirectoryMonitorLibrary::eventData.action = "unknown";
+			break;
+		}
 
-				DirectoryMonitorLibrary::data.enqueue(DirectoryMonitorLibrary::eventData);
-				this_thread::sleep_for(chrono::milliseconds(10));
-			});
-
-		writer.join();
-	}
-
-	int DirectoryMonitorLibrary::processFrame(lua_State* L)
-	{
-		thread reader([&]()
-			{
-				EventData eData;
-				bool canDequeue = DirectoryMonitorLibrary::data.try_dequeue(eData);
-
-				if (canDequeue)
-				{
-					CoronaLuaPushRuntime(L);			  // push 'Runtime'
-					lua_getfield(L, -1, "dispatchEvent"); // push 'f', i.e. Runtime.dispatchEvent
-					lua_insert(L, -2);					  // swap so 'f' is below 'Runtime'
-
-					CoronaLuaNewEvent(L, DirectoryMonitorLibrary::kEventName);
-
-					lua_pushnumber(L, eData.watchID);
-					lua_setfield(L, -2, "watchID");
-
-					lua_pushstring(L, eData.action);
-					lua_setfield(L, -2, "action");
-
-					lua_pushstring(L, eData.rootDirectory);
-					lua_setfield(L, -2, "rootDirectory");
-
-					lua_pushstring(L, eData.filePath);
-					lua_setfield(L, -2, "filePath");
-
-					lua_pushstring(L, eData.previousFilePath);
-					lua_setfield(L, -2, "previousFilePath");
-
-					lua_pushvalue(L, -3);
-					lua_call(L, 3, 0); // Call Runtime.dispatchEvent() with 3 arguments (runtime, eventName, event table)
-				}
-			});
-
-		reader.join();
-
-		return 0;
+		DirectoryMonitorLibrary::data.enqueue(DirectoryMonitorLibrary::eventData);
 	}
 
 	//
@@ -284,6 +237,44 @@ namespace Corona
 			CoronaLuaError(L, "directoryMonitor.unwatch() handle (number) expected, got: %s", lua_typename(L, 1));
 			lua_pushnil(L);
 			return 0;
+		}
+
+		return 0;
+	}
+
+	int DirectoryMonitorLibrary::processFrame(lua_State* L)
+	{
+		if (DirectoryMonitorLibrary::data.size_approx() > 0)
+		{
+			EventData eData;
+			bool canDequeue = DirectoryMonitorLibrary::data.try_dequeue(eData);
+
+			if (canDequeue)
+			{
+				CoronaLuaPushRuntime(L);			  // push 'Runtime'
+				lua_getfield(L, -1, "dispatchEvent"); // push 'f', i.e. Runtime.dispatchEvent
+				lua_insert(L, -2);					  // swap so 'f' is below 'Runtime'
+
+				CoronaLuaNewEvent(L, DirectoryMonitorLibrary::kEventName);
+
+				lua_pushnumber(L, eData.watchID);
+				lua_setfield(L, -2, "watchID");
+
+				lua_pushstring(L, eData.action);
+				lua_setfield(L, -2, "action");
+
+				lua_pushstring(L, eData.rootDirectory);
+				lua_setfield(L, -2, "rootDirectory");
+
+				lua_pushstring(L, eData.filePath);
+				lua_setfield(L, -2, "filePath");
+
+				lua_pushstring(L, eData.previousFilePath);
+				lua_setfield(L, -2, "previousFilePath");
+
+				lua_pushvalue(L, -3);
+				lua_call(L, 3, 0); // Call Runtime.dispatchEvent() with 3 arguments (runtime, eventName, event table)
+			}
 		}
 
 		return 0;
