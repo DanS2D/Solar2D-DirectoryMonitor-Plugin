@@ -5,7 +5,7 @@
 -----------------------------------------------------------------------------------------
 
 local directoryMonitor = require("plugin.directoryMonitor")
-local docsPath = system.pathForFile("", system.DocumentsDirectory)
+local docsPath = system.pathForFile(nil, system.DocumentsDirectory)
 local count = 0
 
 local function directoryListener(event)
@@ -20,4 +20,4 @@ end
 
 Runtime:addEventListener("directoryMonitor", directoryListener)
 
-local watchID = directoryMonitor.watch("C:\\")
+local watchID = directoryMonitor.watch(os.getenv("HOME"))
