@@ -119,7 +119,7 @@ end
 
 Runtime:addEventListener(&quot;directoryMonitor&quot;, directoryListener)
 
-local watchID = directoryMonitor.watch(&quot;C:\\&quot;)
+local watchID = directoryMonitor.watch(os.getenv(&quot;HOME&quot;))
 </code></pre></div>
         </div>
 

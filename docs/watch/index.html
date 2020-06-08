@@ -103,7 +103,7 @@
 <em><a href="">String</a>.</em> The directory path to monitor e.g. <code>C:\\</code>.</p>
 <h2 id="example">Example</h2>
 <pre><code class="lua">local directoryMonitor = require(&quot;plugin.directoryMonitor&quot;)
-local watchID = directoryMonitor.watch(&quot;C:\\&quot;)
+local watchID = directoryMonitor.watch(os.getenv(&quot;HOME&quot;))
 </code></pre>
 
 <p>You can listen for file events via a <a href="../runtimeEvent/">Runtime listener</a></p></div>

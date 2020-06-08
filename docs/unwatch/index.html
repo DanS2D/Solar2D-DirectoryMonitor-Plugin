@@ -97,7 +97,10 @@
 <em><a href="">Number</a>.</em> The directory watch id, as retrieved from <a href="../watch/">directoryMonitor.watch()</a>.</p>
 <h2 id="example">Example</h2>
 <pre><code class="lua">local directoryMonitor = require(&quot;plugin.directoryMonitor&quot;)
-local watchID = directoryMonitor.watch(&quot;C:\\&quot;)
+local watchID = directoryMonitor.watch(os.getenv(&quot;HOME&quot;))
+
+-- sometime later
+directoryMonitor.unwatch(watchID)
 </code></pre></div>
         </div>
 
