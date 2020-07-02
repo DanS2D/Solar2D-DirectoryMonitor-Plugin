@@ -5,3 +5,8 @@ win32/Debug
 win32/Release
 win32/Plugin.vcxproj.filters
 win32/Plugin.vcxproj.user
+linux/.codelite/
+linux/Makefile
+linux/build-**
+linux/compile_flags.txt
+linux/plugin.mk
